@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ResuHub - AI Resume Parser & Builder</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/index.css">
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="app-sidebar no-print">
+            <div class="brand">
+                <div class="logo-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+                <h2>ResuHub</h2>
+            </div>
+            
+            <div class="menu-sections">
+                <div class="menu-item active" data-target="editor"><i class="fa-solid fa-pen-to-square"></i> Editor</div>
+                <div class="menu-item" data-target="template-config"><i class="fa-solid fa-palette"></i> Design & Template</div>
+            </div>
+            
+            <div class="sidebar-actions">
+                <button id="btn-print" class="btn btn-primary btn-block"><i class="fa-solid fa-file-pdf"></i> Export PDF</button>
+                <button id="btn-download-json" class="btn btn-outline btn-block"><i class="fa-solid fa-code"></i> Save JSON</button>
+            </div>
+            
+            <div class="sidebar-footer">
+                <p>AI Resume Parser & Builder v1.0</p>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="app-main">
+            <!-- Top Upload & Controls Bar (No Print) -->
+            <header class="app-header no-print">
+                <div class="header-title">
+                    <h1>Resume Workspace</h1>
+                    <p>Upload your resume to autofill details, edit live, and export formatted templates.</p>
+                </div>
+                
+                <div class="theme-toggle" id="theme-toggle-btn">
+                    <i class="fa-solid fa-moon"></i>
+                </div>
+            </header>
+
+            <div class="workspace-content">
+                <!-- Left Panel: Editor Forms -->
+                <section class="editor-panel no-print">
+                    <!-- File Drag and Drop Section -->
+                    <div class="upload-container" id="drop-zone">
+                        <input type="file" id="file-input" accept=".pdf,.docx,.txt" style="display: none;">
+                        <div class="upload-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                        <h3>Drag & Drop Resume here</h3>
+                        <p>Supports PDF, DOCX, and TXT formats</p>
+                        <button type="button" class="btn btn-sm btn-secondary" onclick="document.getElementById('file-input').click()">Browse Files</button>
+                        
+                        <!-- Upload Progress / Success Status -->
+                        <div id="upload-status" class="upload-status-box" style="display: none;">
+                            <div class="spinner"><i class="fa-solid fa-circle-notch fa-spin"></i></div>
+                            <span id="status-text">Uploading and parsing file...</span>
+                        </div>
+                    </div>
+
+                    <!-- Collapsible Form Sections -->
+                    <div class="forms-wrapper">
+                        <!-- Section: Personal Info -->
+                        <div class="accordion-item expanded">
+                            <div class="accordion-header">
+                                <h3><i class="fa-solid fa-user"></i> Personal Details</h3>
+                                <i class="fa-solid fa-chevron-down toggle-icon"></i>
+                            </div>
+                            <div class="accordion-content">
+                                <div class="form-grid">
+                                    <div class="form-group col-6">
+                                        <label for="input-name">Full Name</label>
+                                        <input type="text" id="input-name" placeholder="John Doe">
+                                    </div>
+                                    <div class="form-group col-6">
+                                        <label for="input-email">Email Address</label>
+                                        <input type="email" id="input-email" placeholder="john.doe@example.com">
+                                    </div>
+                                    <div class="form-group col-6">
+                                        <label for="input-phone">Phone Number</label>
+                                        <input type="text" id="input-phone" placeholder="+91 98765 43210">
+                                    </div>
+                                    <div class="form-group col-6">
+                                        <label for="input-location">Location</label>
+                                        <input type="text" id="input-location" placeholder="Bangalore, India">
+                                    </div>
+                                    <div class="form-group col-6">
+                                        <label for="input-linkedin">LinkedIn Profile</label>
+                                        <input type="text" id="input-linkedin" placeholder="linkedin.com/in/username">
+                                    </div>
+                                    <div class="form-group col-6">
+                                        <label for="input-github">GitHub Profile</label>
+                                        <input type="text" id="input-github" placeholder="github.com/username">
+                                    </div>
+                                    <div class="form-group col-12">
+                                        <label for="input-summary">Professional Summary</label>
+                                        <textarea id="input-summary" rows="4" placeholder="Brief professional description..."></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section: Work Experience -->
+                        <div class="accordion-item">
+                            <div class="accordion-header">
+                                <h3><i class="fa-solid fa-briefcase"></i> Work Experience</h3>
+                                <i class="fa-solid fa-chevron-down toggle-icon"></i>
+                            </div>
+                            <div class="accordion-content">
+                                <div id="experience-list" class="repeater-list">
+                                    <!-- Dynamic list items will be injected here -->
+                                </div>
+                                <button type="button" class="btn btn-sm btn-secondary add-btn" id="btn-add-experience">
+                                    <i class="fa-solid fa-plus"></i> Add Work Experience
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Section: Education -->
+                        <div class="accordion-item">
+                            <div class="accordion-header">
+                                <h3><i class="fa-solid fa-graduation-cap"></i> Education</h3>
+                                <i class="fa-solid fa-chevron-down toggle-icon"></i>
+                            </div>
+                            <div class="accordion-content">
+                                <div id="education-list" class="repeater-list">
+                                    <!-- Dynamic list items will be injected here -->
+                                </div>
+                                <button type="button" class="btn btn-sm btn-secondary add-btn" id="btn-add-education">
+                                    <i class="fa-solid fa-plus"></i> Add Education
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Section: Projects -->
+                        <div class="accordion-item">
+                            <div class="accordion-header">
+                                <h3><i class="fa-solid fa-diagram-project"></i> Projects</h3>
+                                <i class="fa-solid fa-chevron-down toggle-icon"></i>
+                            </div>
+                            <div class="accordion-content">
+                                <div id="projects-list" class="repeater-list">
+                                    <!-- Dynamic list items will be injected here -->
+                                </div>
+                                <button type="button" class="btn btn-sm btn-secondary add-btn" id="btn-add-project">
+                                    <i class="fa-solid fa-plus"></i> Add Project
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Section: Skills -->
+                        <div class="accordion-item">
+                            <div class="accordion-header">
+                                <h3><i class="fa-solid fa-brain"></i> Technical Skills</h3>
+                                <i class="fa-solid fa-chevron-down toggle-icon"></i>
+                            </div>
+                            <div class="accordion-content">
+                                <div class="skills-editor">
+                                    <p class="section-hint">Separate skills with commas. Use categories to organize them.</p>
+                                    
+                                    <div class="form-group">
+                                        <label for="skills-languages">Programming Languages</label>
+                                        <input type="text" id="skills-languages" placeholder="Python, JavaScript, SQL...">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="skills-frameworks">Frameworks & Libraries</label>
+                                        <input type="text" id="skills-frameworks" placeholder="React, FastAPI, TensorFlow...">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="skills-databases">Databases & Caching</label>
+                                        <input type="text" id="skills-databases" placeholder="PostgreSQL, MongoDB, Redis...">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="skills-cloud">Cloud & DevOps</label>
+                                        <input type="text" id="skills-cloud" placeholder="AWS, Docker, GitHub Actions...">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="skills-tools">Tools & Methodologies</label>
+                                        <input type="text" id="skills-tools" placeholder="Git, Jira, Agile, Scrum...">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Configuration/Design Panel (No Print) -->
+                <section class="design-panel no-print" style="display: none;">
+                    <div class="design-section">
+                        <h3>Template Select</h3>
+                        <div class="template-grid">
+                            <div class="template-card active" data-template="modern">
+                                <div class="template-mock modern-mock">
+                                    <div class="mock-sidebar"></div>
+                                    <div class="mock-main">
+                                        <div class="mock-line title"></div>
+                                        <div class="mock-line"></div>
+                                        <div class="mock-line"></div>
+                                    </div>
+                                </div>
+                                <span>Modern Sidebar</span>
+                            </div>
+                            <div class="template-card" data-template="academic">
+                                <div class="template-mock academic-mock">
+                                    <div class="mock-header">
+                                        <div class="mock-line title center"></div>
+                                        <div class="mock-line center"></div>
+                                    </div>
+                                    <div class="mock-main">
+                                        <div class="mock-line"></div>
+                                        <div class="mock-line"></div>
+                                    </div>
+                                </div>
+                                <span>Clean Academic</span>
+                            </div>
+                            <div class="template-card" data-template="tech">
+                                <div class="template-mock tech-mock">
+                                    <div class="mock-header">
+                                        <div class="mock-line title"></div>
+                                        <div class="mock-pills">
+                                            <div class="mock-pill"></div>
+                                            <div class="mock-pill"></div>
+                                        </div>
+                                    </div>
+                                    <div class="mock-main">
+                                        <div class="mock-line"></div>
+                                        <div class="mock-line"></div>
+                                    </div>
+                                </div>
+                                <span>Tech Badge Grid</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="design-section">
+                        <h3>Style Customizer</h3>
+                        
+                        <div class="form-group">
+                            <label>Primary Accent Color</label>
+                            <div class="color-picker-wrapper">
+                                <input type="color" id="style-accent-color" value="#4f46e5">
+                                <span class="color-value">#4f46e5</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Typography Font</label>
+                            <select id="style-font-family">
+                                <option value="Outfit">Outfit (Modern Rounded)</option>
+                                <option value="Inter">Inter (Professional Sans)</option>
+                                <option value="Playfair Display">Playfair Display (Serif/Classic)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Base Font Size</label>
+                            <div class="range-slider">
+                                <input type="range" id="style-font-size" min="12" max="16" step="0.5" value="14">
+                                <span class="range-value">14px</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Line Spacing</label>
+                            <div class="range-slider">
+                                <input type="range" id="style-line-height" min="1.15" max="1.6" step="0.05" value="1.4">
+                                <span class="range-value">1.4</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Section Order</label>
+                            <div class="sortable-list" id="section-order-list">
+                                <div class="sortable-item" data-section="summary"><i class="fa-solid fa-grip-vertical"></i> Summary</div>
+                                <div class="sortable-item" data-section="experience"><i class="fa-solid fa-grip-vertical"></i> Experience</div>
+                                <div class="sortable-item" data-section="projects"><i class="fa-solid fa-grip-vertical"></i> Projects</div>
+                                <div class="sortable-item" data-section="education"><i class="fa-solid fa-grip-vertical"></i> Education</div>
+                                <div class="sortable-item" data-section="skills"><i class="fa-solid fa-grip-vertical"></i> Skills</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Right Panel: Live Resume Sheet Preview -->
+                <section class="preview-panel">
+                    <div class="preview-controls no-print">
+                        <div class="preview-zoom">
+                            <button id="zoom-out" title="Zoom Out"><i class="fa-solid fa-magnifying-glass-minus"></i></button>
+                            <span id="zoom-percentage">100%</span>
+                            <button id="zoom-in" title="Zoom In"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
+                        </div>
+                        <div class="preview-status">
+                            <span class="pulse-indicator green"></span>
+                            Live Syncing
+                        </div>
+                    </div>
+                    
+                    <!-- The actual A4 Resume Sheet -->
+                    <div class="resume-sheet-container">
+                        <div id="resume-preview" class="resume-preview template-modern">
+                            <!-- Live content will be compiled and rendered here -->
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Script files -->
+    <script src="/static/app.js"></script>
+</body>
+</html>
